@@ -1,0 +1,21 @@
+{
+    "id": 3,
+    "name": "Project 3",
+    "description": "Description for Project 3",
+    "url": "https://example.com/project3",
+"longDescription": "This is a long description for Project 1. It provides detailed information about the project. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed feugiat, quam sit amet fermentum efficitur, mauris neque volutpat magna, ac volutpat velit purus id justo. Integer varius nisl vel justo malesuada interdum. Integer id volutpat mi. Pellentesque auctor, eros ac lacinia tincidunt, neque elit varius turpis, vel rhoncus ex justo nec augue. Quisque ut felis at risus convallis vestibulum et non dui. Vestibulum aliquet mi eu sapien fringilla ultrices. In hac habitasse platea dictumst. Proin et risus vel sapien sodales tincidunt. Nullam hendrerit ligula ac metus accumsan, eget cursus odio vulputate. Aenean euismod auctor metus vel euismod. Sed hendrerit ultricies ex, eu posuere metus elementum et. Phasellus vel eleifend sapien. Fusce quis nisi vel ex bibendum dictum. Suspendisse potenti. Quisque varius lacus eget odio tincidunt, vel tincidunt orci dapibus.",
+    "tags": [
+        "tag3",
+        "tag6",
+        "tag7"
+    ],
+    "startDate": "2023-03-01",
+    "endDate": "2023-10-31",
+    "status": "Planning",
+    "teamMembers": [
+        "Charlie Brown",
+        "Diana Miller"
+    ],
+    "githubRepo": "https://github.com/example/project3",
+    "image": "https://source.unsplash.com/random/200x200"
+}
