@@ -26,6 +26,7 @@ func engine() *gin.Engine {
 	r.Use(sessions.Sessions("mysession", cookie.NewStore(secret)))
 
 	// Login and logout, register routes
+	r.POST("/", controllers.Hey)
 	r.POST("/login", controllers.Login)
 	r.GET("/logout", controllers.Logout)
 	r.POST("/register", controllers.Register)

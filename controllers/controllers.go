@@ -71,6 +71,10 @@ func AuthRequired(c *gin.Context) {
 	c.Next()
 }
 
+func Hey(c *gin.Context) {
+	c.JSON(http.StatusOK, "Hey!")
+}
+
 // login is a handler that parses a form and checks for specific data.
 func Login(c *gin.Context) {
 	session := sessions.Default(c)
