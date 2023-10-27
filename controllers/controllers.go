@@ -72,7 +72,7 @@ func AuthRequired(c *gin.Context) {
 }
 
 func Hey(c *gin.Context) {
-	c.JSON(http.StatusOK, "Hey!")
+	c.JSON(http.StatusOK, "Hey!!!")
 }
 
 // login is a handler that parses a form and checks for specific data.
