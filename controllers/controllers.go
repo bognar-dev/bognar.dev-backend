@@ -36,7 +36,7 @@ func GetProjects(c *gin.Context) {
 	c.JSON(http.StatusOK, projects)
 }
 func CreateProject(c *gin.Context) {
-	var project models.Project
+	var project models.ProjectData
 	if err := c.ShouldBindJSON(&project); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -47,6 +47,7 @@ func CreateProject(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to marshal JSON"})
 		return
 	}
+	fmt.Println(project)
 
 	_, err = database.DBClient.Exec(`INSERT INTO projects (data)
         VALUES ($1)`, projectJSON)
@@ -103,12 +104,12 @@ func Login(c *gin.Context) {
 	}
 
 	// Save the u.Username in the session
-	session.Set(userkey, u.Username) // In real world usage you'd set this to the users ID
+	session.Set(userkey, u.ID)
 	if err := session.Save(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Successfully authenticated user"})
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
 
 // logout is the handler called for the user to log out.
@@ -124,7 +125,7 @@ func Logout(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged out"})
+	c.JSON(http.StatusOK, gin.H{"status": "Successfully logged out"})
 }
 
 // me is the handler that will return the user information stored in the
