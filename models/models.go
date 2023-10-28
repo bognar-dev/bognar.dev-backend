@@ -56,7 +56,7 @@ func LoginCheck(username string, password string) error {
 
 	err = VerifyPassword(password, u.Password)
 
-	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+	if err != nil && errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 		return err
 	}
 
