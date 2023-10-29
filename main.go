@@ -3,6 +3,7 @@ package main
 import (
 	"bognar.dev-backend/controllers"
 	"bognar.dev-backend/database"
+	"bognar.dev-backend/middlewares"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -23,12 +24,12 @@ func engine() *gin.Engine {
 	r := gin.New()
 	var secret = []byte("secret")
 	// Setup the cookie store for session management
+	r.Use(middlewares.RateLimit)
 	r.Use(sessions.Sessions("mysession", cookie.NewStore(secret)))
 
 	// Login and logout, register routes
 	r.GET("/", controllers.Hey)
 	r.POST("/login", controllers.Login)
-	r.GET("/logout", controllers.Logout)
 	r.POST("/register", controllers.Register)
 
 	// Serve projects
@@ -36,9 +37,9 @@ func engine() *gin.Engine {
 
 	// Private group, require authentication to access
 	private := r.Group("/private")
-	private.Use(controllers.AuthRequired)
+	private.Use(middlewares.JwtAuthMiddleware())
 	{
-		private.GET("/me", controllers.Me)
+		private.GET("/user", controllers.CurrentUser)
 		private.GET("/status", controllers.Status)
 		private.POST("/createProject", controllers.CreateProject)
 	}

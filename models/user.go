@@ -2,6 +2,7 @@ package models
 
 import (
 	"bognar.dev-backend/database"
+	"bognar.dev-backend/utils"
 	"errors"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
@@ -30,7 +31,7 @@ type Project struct {
 }
 
 type User struct {
-	ID         int    `db:"id" json:"id"`
+	ID         uint   `db:"id" json:"id"`
 	SignedUpAt string `db:"signed_up_at" json:"signed_up_at"`
 	Username   string `db:"username" json:"username"`
 	Password   string `db:"password" json:"password"`
@@ -40,7 +41,7 @@ func VerifyPassword(password, hashedPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
-func LoginCheck(username string, password string) error {
+func LoginCheck(username string, password string) (string, error) {
 
 	var err error
 
@@ -51,16 +52,22 @@ func LoginCheck(username string, password string) error {
 		"SELECT * FROM users LIMIT 1")
 	fmt.Print(err)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = VerifyPassword(password, u.Password)
 
-	if err != nil && errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-		return err
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		return "", err
 	}
 
-	return nil
+	token, err := token.GenerateToken(uint(u.ID))
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 
 }
 
@@ -103,4 +110,21 @@ func (u *User) BeforeSave() error {
 
 	return nil
 
+}
+
+func GetUserByID(uid uint) (User, error) {
+
+	var u User
+
+	if err := database.DBClient.Get(&u, `SELECT * from users where id = ($1)`, uid); err != nil {
+		return u, err
+	}
+
+	u.PrepareGive()
+
+	return u, nil
+
+}
+func (u *User) PrepareGive() {
+	u.Password = ""
 }
