@@ -29,7 +29,7 @@ func GenerateToken(userId uint) (string, error) {
 
 }
 
-func TokenValid(c *gin.Context) error {
+func ValidateToken(c *gin.Context) error {
 	tokenString := ExtractToken(c)
 	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -38,6 +38,7 @@ func TokenValid(c *gin.Context) error {
 		return []byte(os.Getenv("API_SECRET")), nil
 	})
 	if err != nil {
+		fmt.Println("Validation err: ", err)
 		return err
 	}
 	return nil

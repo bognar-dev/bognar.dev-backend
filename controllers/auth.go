@@ -3,6 +3,7 @@ package controllers
 import (
 	"bognar.dev-backend/models"
 	token "bognar.dev-backend/utils"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -13,7 +14,7 @@ type LoginInput struct {
 }
 
 func Login(c *gin.Context) {
-
+	fmt.Println("Login")
 	var input LoginInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -26,14 +27,19 @@ func Login(c *gin.Context) {
 	u.Username = input.Username
 	u.Password = input.Password
 
-	token, err := models.LoginCheck(u.Username, u.Password)
+	t, err := models.LoginCheck(u.Username, u.Password)
+	err = token.ValidateToken(c)
+	if err != nil {
+		fmt.Println("new token required")
+		t, _ = token.GenerateToken(u.ID)
 
+	}
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "username or password is incorrect."})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, gin.H{"token": t})
 
 }
 
