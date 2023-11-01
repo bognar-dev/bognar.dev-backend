@@ -21,25 +21,28 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
+	fmt.Println(input)
 	u := models.User{}
 
 	u.Username = input.Username
 	u.Password = input.Password
 
 	t, err := models.LoginCheck(u.Username, u.Password)
-	err = token.ValidateToken(c)
-	if err != nil {
-		fmt.Println("new token required")
-		t, _ = token.GenerateToken(u.ID)
-
-	}
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "username or password is incorrect."})
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"token": t})
+	//err = token.ValidateToken(c)
+	if err != nil {
+		fmt.Println("Token error: ", err)
+		t, _ = token.GenerateToken(u.ID)
+		fmt.Println("New token generated")
+		fmt.Println("New Token: ", t)
+		c.JSON(http.StatusOK, gin.H{"status": err.Error(), "token": t})
+		return
+	}
+	fmt.Println("success")
+	c.JSON(http.StatusOK, gin.H{"status": "success", "token": t})
 
 }
 

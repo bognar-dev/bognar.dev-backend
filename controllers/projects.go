@@ -57,5 +57,6 @@ func CreateProject(c *gin.Context) {
 }
 
 func Hey(c *gin.Context) {
-	c.JSON(http.StatusOK, "Hey!!!")
+	fmt.Println("hey")
+	c.JSON(http.StatusOK, gin.H{"data": "Hey!!!"})
 }

@@ -15,6 +15,7 @@ func main() {
 	database.InitDB()
 	r := engine()
 	r.Use(gin.Logger())
+	gin.SetMode(gin.ReleaseMode)
 	if err := engine().Run(":8080"); err != nil {
 		log.Fatal("Unable to start:", err)
 	}
@@ -24,7 +25,7 @@ func engine() *gin.Engine {
 	r := gin.New()
 	var secret = []byte("secret")
 	// Setup the cookie store for session management
-	r.Use(middlewares.RateLimit)
+	//r.Use(middlewares.RateLimit)
 	r.Use(sessions.Sessions("mysession", cookie.NewStore(secret)))
 
 	// Login and logout, register routes
