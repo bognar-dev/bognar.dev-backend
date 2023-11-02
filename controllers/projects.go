@@ -10,24 +10,25 @@ import (
 )
 
 func GetProjects(c *gin.Context) {
-	var project []models.Project
-	err := database.DBClient.Select(&project, "SELECT data::json FROM projects ")
+	var projects []models.Project
+	err := database.DBClient.Select(&projects, "SELECT * FROM projects ")
 	if err != nil {
 		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	var projects []models.ProjectData
-	for _, p := range project {
+	/*var projectsJSONBlob []models.ProjectData
+	for _, p := range projects {
 		var projectDetails models.ProjectData
 		err = json.Unmarshal([]byte(p.Data), &projectDetails)
-		projects = append(projects, projectDetails)
+		projectsJSONBlob = append(projectsJSONBlob, projectDetails)
 		if err != nil {
 			fmt.Println(err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-	}
+	}*/
+	fmt.Println(projects)
 
 	c.JSON(http.StatusOK, projects)
 }

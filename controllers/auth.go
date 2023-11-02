@@ -21,15 +21,16 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	fmt.Println(input)
+
 	u := models.User{}
 
 	u.Username = input.Username
 	u.Password = input.Password
-
-	t, err := models.LoginCheck(u.Username, u.Password)
+	fmt.Println(u)
+	t, err := models.LoginCheck(&u)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "username or password is incorrect."})
+
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	//err = token.ValidateToken(c)

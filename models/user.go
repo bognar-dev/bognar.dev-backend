@@ -3,6 +3,8 @@ package models
 import (
 	"bognar.dev-backend/database"
 	"bognar.dev-backend/utils"
+	"database/sql/driver"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
@@ -24,10 +26,10 @@ type ProjectData struct {
 	Image           string   `json:"image"`
 }
 type Project struct {
-	ID        int    `db:"id" json:"id"`
-	CreatedAt string `db:"created_at" json:"created_at"`
-	Data      string `db:"data" json:"data"`
-	UpdatedAt string `db:"updated_at" json:"updated_at"`
+	ID        int         `db:"id" json:"id"`
+	CreatedAt string      `db:"created_at" json:"created_at"`
+	Data      ProjectData `db:"data" json:"data"`
+	UpdatedAt string      `db:"updated_at" json:"updated_at"`
 }
 
 type User struct {
@@ -37,36 +39,63 @@ type User struct {
 	Password   string `db:"password" json:"password"`
 }
 
+// Implement the Value method to convert ProjectData to a database value.
+func (pd ProjectData) Value() (driver.Value, error) {
+	// Marshal the ProjectData as JSON
+	jsonData, err := json.Marshal(pd)
+	if err != nil {
+		return nil, err
+	}
+	return jsonData, nil
+}
+
+// Implement the Scan method to convert a database value to ProjectData.
+func (pd *ProjectData) Scan(value interface{}) error {
+	// Ensure the value is a byte slice
+	byteData, ok := value.([]byte)
+	if !ok {
+		return errors.New("Scan source is not []byte")
+	}
+
+	// Unmarshal JSON into ProjectData
+	if err := json.Unmarshal(byteData, pd); err != nil {
+		return err
+	}
+	return nil
+}
+
 func VerifyPassword(password, hashedPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
-func LoginCheck(username string, password string) (string, error) {
+func LoginCheck(user *User) (string, error) {
 
 	var err error
 
-	var u User
-
+	var databaseUser User
+	//var preparedUsername = "'"+user.Username+"'"
+	//fmt.Println()
 	err = database.DBClient.Get(
-		&u,
-		"SELECT * FROM users LIMIT 1")
-	fmt.Print(err)
+		&databaseUser,
+		`SELECT * FROM users WHERE username = $1`, user.Username)
+	fmt.Println("databaseuser ", databaseUser)
+	fmt.Println("database error = ", err)
 	if err != nil {
 		return "", err
 	}
 
-	err = VerifyPassword(password, u.Password)
-
-	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+	err = VerifyPassword(user.Password, databaseUser.Password)
+	fmt.Println("password verified")
+	if err != nil && errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 		return "", err
 	}
 
-	token, err := token.GenerateToken(u.ID)
+	token, err := token.GenerateToken(databaseUser.ID)
 
 	if err != nil {
 		return "", err
 	}
-
+	fmt.Println("token generated")
 	return token, nil
 
 }
