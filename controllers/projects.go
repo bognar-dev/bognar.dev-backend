@@ -59,22 +59,15 @@ func CreateProject(c *gin.Context) {
 }
 func GetProjectByID(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var projects []models.Project
-	err := database.DBClient.Select(&projects, "SELECT * FROM projects ")
+	fmt.Println(id)
+	var project models.Project
+	err := database.DBClient.Get(&project, "SELECT * FROM projects WHERE id = ($1)", id)
 	if err != nil {
 		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	// Loop over the list of albums, looking for
-	// an album whose ID value matches the parameter.
-	for _, p := range projects {
-		if p.ID == id {
-			c.JSON(http.StatusOK, projects)
-			return
-		}
-	}
-	c.JSON(http.StatusNotFound, gin.H{"status": "not found"})
+	c.JSON(http.StatusOK, project)
 }
 
 func Hey(c *gin.Context) {
