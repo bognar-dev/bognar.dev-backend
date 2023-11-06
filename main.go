@@ -34,7 +34,7 @@ func engine() *gin.Engine {
 	r.POST("/register", controllers.Register)
 	// Serve projects
 	r.GET("/api/projects", controllers.GetProjects)
-	r.GET("/api/prjects/:id", controllers.GetProjectByID)
+	r.GET("/api/projects/:id", controllers.GetProjectByID)
 
 	// Private group, require authentication to access
 	private := r.Group("/private")
