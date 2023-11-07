@@ -87,6 +87,7 @@ func UpdateProject(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
+
 	c.JSON(http.StatusOK, project)
 }
 
