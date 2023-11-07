@@ -69,6 +69,26 @@ func GetProjectByID(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, project)
 }
+func UpdateProject(c *gin.Context) {
+
+	var project models.Project
+	if err := c.ShouldBindJSON(&project); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Println(project)
+
+	err, _ := database.DBClient.NamedExec(`UPDATE projects SET
+                    data=:data,
+                    updated_at=: time.Now()
+                WHERE id = :ID`, project)
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+	c.JSON(http.StatusOK, project)
+}
 
 func Hey(c *gin.Context) {
 	fmt.Println("hey")
