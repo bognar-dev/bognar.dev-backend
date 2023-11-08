@@ -43,7 +43,7 @@ func engine() *gin.Engine {
 		private.GET("/user", controllers.CurrentUser)
 		private.GET("/status", controllers.Status)
 		private.POST("/createProject", controllers.CreateProject)
-		private.POST("/updatePost", controllers.UpdateProject)
+		private.POST("/updateProject", controllers.UpdateProject)
 	}
 	return r
 }

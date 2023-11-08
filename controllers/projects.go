@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func GetProjects(c *gin.Context) {
@@ -72,19 +73,24 @@ func GetProjectByID(c *gin.Context) {
 func UpdateProject(c *gin.Context) {
 
 	var project models.Project
+
 	if err := c.ShouldBindJSON(&project); err != nil {
+		fmt.Println("Json Bind error:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	fmt.Println(project)
-
-	err, _ := database.DBClient.NamedExec(`UPDATE projects SET
+	fmt.Println("id: ", project.Id)
+	fmt.Println("Data: ", project.Data)
+	project.UpdatedAt = time.Now()
+	fmt.Println("updatedAt: ", project.UpdatedAt)
+	res, err := database.DBClient.NamedExec(`UPDATE projects SET
                     data=:data,
-                    updated_at=: time.Now()
-                WHERE id = :ID`, project)
+                    updated_at=:updated_at
+                WHERE id = :id`, &project)
+	fmt.Println("Update res:", res)
 	if err != nil {
-		fmt.Println(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		fmt.Println(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

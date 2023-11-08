@@ -3,8 +3,6 @@ package models
 import (
 	"bognar.dev-backend/database"
 	"bognar.dev-backend/utils"
-	"database/sql/driver"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
@@ -12,56 +10,11 @@ import (
 	"strings"
 )
 
-type ProjectData struct {
-	Name            string   `json:"name"`
-	Description     string   `json:"description"`
-	Url             string   `json:"url"`
-	LongDescription string   `json:"longDescription"`
-	Tags            []string `json:"tags"`
-	StartDate       string   `json:"startDate"`
-	EndDate         string   `json:"endDate"`
-	Status          string   `json:"status"`
-	TeamMembers     []string `json:"teamMembers"`
-	GithubRepo      string   `json:"githubRepo"`
-	Image           string   `json:"image"`
-}
-type Project struct {
-	ID        int         `db:"id" json:"id"`
-	CreatedAt string      `db:"created_at" json:"created_at"`
-	Data      ProjectData `db:"data" json:"data"`
-	UpdatedAt string      `db:"updated_at" json:"updated_at"`
-}
-
 type User struct {
 	ID         uint   `db:"id" json:"id"`
 	SignedUpAt string `db:"signed_up_at" json:"signed_up_at"`
 	Username   string `db:"username" json:"username"`
 	Password   string `db:"password" json:"password"`
-}
-
-// Implement the Value method to convert ProjectData to a database value.
-func (pd ProjectData) Value() (driver.Value, error) {
-	// Marshal the ProjectData as JSON
-	jsonData, err := json.Marshal(pd)
-	if err != nil {
-		return nil, err
-	}
-	return jsonData, nil
-}
-
-// Implement the Scan method to convert a database value to ProjectData.
-func (pd *ProjectData) Scan(value interface{}) error {
-	// Ensure the value is a byte slice
-	byteData, ok := value.([]byte)
-	if !ok {
-		return errors.New("Scan source is not []byte")
-	}
-
-	// Unmarshal JSON into ProjectData
-	if err := json.Unmarshal(byteData, pd); err != nil {
-		return err
-	}
-	return nil
 }
 
 func VerifyPassword(password, hashedPassword string) error {
@@ -90,13 +43,13 @@ func LoginCheck(user *User) (string, error) {
 		return "", err
 	}
 
-	token, err := token.GenerateToken(databaseUser.ID)
+	t, err := token.GenerateToken(databaseUser.ID)
 
 	if err != nil {
 		return "", err
 	}
-	fmt.Println("token generated")
-	return token, nil
+	fmt.Println("t generated")
+	return t, nil
 
 }
 
