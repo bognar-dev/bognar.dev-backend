@@ -78,6 +78,7 @@ func Register(c *gin.Context) {
 }
 
 func Status(c *gin.Context) {
+	fmt.Println("{status: You are logged in}")
 	c.JSON(http.StatusOK, gin.H{"status": "You are logged in"})
 }
 
