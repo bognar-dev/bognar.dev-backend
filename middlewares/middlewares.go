@@ -10,15 +10,13 @@ import (
 
 func JwtAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fmt.Println("Hello from Middleware")
+		fmt.Println("jwt middleware")
 		err := token.ValidateToken(c)
 		if err != nil {
-			fmt.Println("Error in Validate")
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": err.Error()})
+			c.String(http.StatusUnauthorized, "Unauthorized")
+			c.Abort()
 			return
 		}
-		fmt.Println("Passed middleware")
 		c.Next()
-
 	}
 }

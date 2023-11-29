@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 func GetProjects(c *gin.Context) {
@@ -71,30 +70,29 @@ func GetProjectByID(c *gin.Context) {
 	c.JSON(http.StatusOK, project)
 }
 func UpdateProject(c *gin.Context) {
+	fmt.Println("Hello from UpdateProject")
+	var updateForm models.UpdateProjectForm
+	err := c.Bind(&updateForm)
 
-	var project models.Project
-
-	if err := c.ShouldBindJSON(&project); err != nil {
-		fmt.Println("Json Bind error:", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	fmt.Println("id: ", project.Id)
-	fmt.Println("Data: ", project.Data)
-	project.UpdatedAt = time.Now()
-	fmt.Println("updatedAt: ", project.UpdatedAt)
-	res, err := database.DBClient.NamedExec(`UPDATE projects SET
-                    data=:data,
-                    updated_at=:updated_at
-                WHERE id = :id`, &project)
-	fmt.Println("Update res:", res)
 	if err != nil {
-		fmt.Println(err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		fmt.Println("Form Bind error:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	c.JSON(http.StatusOK, project)
+	fmt.Println("updateForm:", updateForm)
+
+	/*res, err := database.DBClient.NamedExec(`UPDATE projects SET
+	                    data=:data,
+	                    updated_at=:updated_at
+	                WHERE id = :id`, &project)
+		fmt.Println("Update res:", res)
+		if err != nil {
+			fmt.Println(err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}*/
+
+	c.JSON(http.StatusOK, updateForm)
 }
 
 func Hey(c *gin.Context) {

@@ -14,7 +14,7 @@ type LoginInput struct {
 }
 
 func Login(c *gin.Context) {
-	fmt.Println("Login")
+
 	var input LoginInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -26,24 +26,15 @@ func Login(c *gin.Context) {
 
 	u.Username = input.Username
 	u.Password = input.Password
-	fmt.Println(u)
-	t, err := models.LoginCheck(&u)
-	if err != nil {
 
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	//err = token.ValidateToken(c)
+	t, err := models.LoginCheck(&u)
+
 	if err != nil {
-		fmt.Println("Token error: ", err)
-		t, _ = token.GenerateToken(u.ID)
-		fmt.Println("New token generated")
-		fmt.Println("New Token: ", t)
-		c.JSON(http.StatusOK, gin.H{"status": err.Error(), "token": t})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "username or password is incorrect."})
 		return
 	}
-	fmt.Println("success")
-	c.JSON(http.StatusOK, gin.H{"status": "success", "token": t})
+
+	c.JSON(http.StatusOK, gin.H{"message": "success", "token": t})
 
 }
 
