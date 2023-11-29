@@ -6,8 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	supa "github.com/nedpals/supabase-go"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"time"
 )
 
 func GetProjects(c *gin.Context) {
@@ -72,27 +76,68 @@ func GetProjectByID(c *gin.Context) {
 func UpdateProject(c *gin.Context) {
 	fmt.Println("Hello from UpdateProject")
 	var updateForm models.UpdateProjectForm
+	var project models.Project
 	err := c.Bind(&updateForm)
-
 	if err != nil {
 		fmt.Println("Form Bind error:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-
-	fmt.Println("updateForm:", updateForm)
-
-	/*res, err := database.DBClient.NamedExec(`UPDATE projects SET
-	                    data=:data,
-	                    updated_at=:updated_at
-	                WHERE id = :id`, &project)
-		fmt.Println("Update res:", res)
+	filePath := filepath.Join("uploads", updateForm.Image.Filename)
+	// Save the file to the defined path
+	if err := c.SaveUploadedFile(updateForm.Image, filePath); err != nil {
+		fmt.Println("SaveUploadedFile error:", err)
+	}
+	file, err := os.Open(filePath)
+	if err != nil {
+		fmt.Println("Failed to open file:", err)
+		return
+	}
+	defer func(file *os.File) {
+		err := file.Close()
 		if err != nil {
-			fmt.Println(err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}*/
+			fmt.Println("Failed to close file:", err)
+		}
+	}(file)
 
-	c.JSON(http.StatusOK, updateForm)
+	storage := database.SBClient.Storage.From("images")
+	fmt.Println("storage:", storage.BucketId)
+	var update = false
+	files := storage.List("", supa.FileSearchOptions{})
+	for _, f := range files {
+		if f.Name == updateForm.Image.Filename {
+			fmt.Println("File already exists")
+			update = true
+		}
+	}
+	updateConfirm := storage.UploadOrUpdate("/"+updateForm.Image.Filename, file, update)
+	fmt.Println("Upload Message = ", updateConfirm.Message, " Upload Key = ", updateConfirm.Key)
+	publicURL := storage.GetPublicUrl(updateConfirm.Key)
+	fmt.Println("Public URL = ", publicURL)
+
+	project.Data = models.ProjectData{
+		Image:           publicURL.SignedUrl,
+		Name:            updateForm.ProjectName,
+		Description:     updateForm.Description,
+		LongDescription: updateForm.LongDescription,
+		StartDate:       updateForm.SinceDate,
+		Tags:            updateForm.Tags,
+	}
+
+	project.Id, _ = strconv.Atoi(updateForm.ID)
+	project.UpdatedAt = time.Now()
+
+	res, err := database.DBClient.NamedExec(`UPDATE projects SET
+		                    data=:data,
+		                    updated_at=:updated_at
+		                WHERE id = :id`, &project)
+	fmt.Println("Update res:", res)
+	if err != nil {
+		fmt.Println(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Println(project)
+	c.JSON(http.StatusOK, project)
 }
 
 func Hey(c *gin.Context) {

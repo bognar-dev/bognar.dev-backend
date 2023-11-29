@@ -21,6 +21,7 @@ func GenerateToken(userId uint) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["user_id"] = userId
+	fmt.Println("Token Lifespan: ", time.Now().Add(time.Hour*time.Duration(token_lifespan)).Unix())
 	claims["exp"] = time.Now().Add(time.Hour * time.Duration(token_lifespan)).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
@@ -30,6 +31,7 @@ func GenerateToken(userId uint) (string, error) {
 
 func ValidateToken(c *gin.Context) error {
 	tokenString := ExtractToken(c)
+	fmt.Println("tokenString = ", tokenString)
 	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
@@ -44,14 +46,17 @@ func ValidateToken(c *gin.Context) error {
 
 func ExtractToken(c *gin.Context) string {
 	token := c.Query("token")
+	fmt.Println("token = ", token)
 	if token != "" {
 		return token
 	}
 	bearerToken := c.Request.Header.Get("Authorization")
+	fmt.Println("Bearer token=", bearerToken)
 	if len(strings.Split(bearerToken, " ")) == 2 {
 		return strings.Split(bearerToken, " ")[1]
 	}
-	return ""
+	fmt.Println("returning empty string")
+	return bearerToken
 }
 
 func ExtractTokenID(c *gin.Context) (uint, error) {

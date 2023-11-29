@@ -4,18 +4,19 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"mime/multipart"
 	"time"
 )
 
 type UpdateProjectForm struct {
-	ID              string   `form:"id"`
-	ImageURL        string   `form:"imageURL"`
-	Image           []byte   `form:"image"`
-	ProjectName     string   `form:"projectName"`
-	SinceDate       string   `form:"sinceDate"`
-	Tags            []string `form:"tag"`
-	Description     string   `form:"description"`
-	LongDescription string   `form:"longDescription"`
+	ID              string                `form:"id"`
+	ImageURL        string                `form:"imageURL"`
+	Image           *multipart.FileHeader ` form:"image"`
+	ProjectName     string                `form:"projectName"`
+	SinceDate       string                `form:"sinceDate"`
+	Tags            []string              `form:"tags"`
+	Description     string                `form:"description"`
+	LongDescription string                `form:"longDescription"`
 }
 
 type ProjectData struct {

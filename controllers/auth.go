@@ -18,6 +18,7 @@ func Login(c *gin.Context) {
 	var input LoginInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
+		fmt.Println("JSON Bind error: ", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -30,9 +31,11 @@ func Login(c *gin.Context) {
 	t, err := models.LoginCheck(&u)
 
 	if err != nil {
+		fmt.Println("LoginCheck error: ", err)
 		c.JSON(http.StatusBadRequest, gin.H{"message": "username or password is incorrect."})
 		return
 	}
+	fmt.Println("LoginCheck success got token: ", t)
 
 	c.JSON(http.StatusOK, gin.H{"message": "success", "token": t})
 

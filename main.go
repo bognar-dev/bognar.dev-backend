@@ -13,6 +13,7 @@ import (
 
 func main() {
 	database.InitDB()
+	database.InitSupabase()
 	r := engine()
 	r.Use(gin.Logger())
 	gin.SetMode(gin.ReleaseMode)

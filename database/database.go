@@ -5,10 +5,12 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	supa "github.com/nedpals/supabase-go"
 	"os"
 )
 
 var DBClient *sqlx.DB
+var SBClient *supa.Client
 
 func InitDB() {
 	err := godotenv.Load(".env")
@@ -24,4 +26,12 @@ func InitDB() {
 		panic(err)
 	}
 	DBClient = db
+}
+
+func InitSupabase() {
+	supabaseUrl := os.Getenv("SUPA_URL")
+	supabaseKey := os.Getenv("SUPA_KEY")
+	Supa := supa.CreateClient(supabaseUrl, supabaseKey)
+	SBClient = Supa
+
 }
