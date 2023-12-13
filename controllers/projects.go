@@ -11,12 +11,15 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
 func GetProjects(c *gin.Context) {
 	var projects []models.Project
 	err := database.DBClient.Select(&projects, "SELECT * FROM projects ")
+	fmt.Println("Projects ", projects)
+	fmt.Println("err ", err)
 	if err != nil {
 		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -100,27 +103,51 @@ func UpdateProject(c *gin.Context) {
 	}(file)
 
 	storage := database.SBClient.Storage.From("images")
+	var filename string
+	filename = strings.ToLower(updateForm.Image.Filename)
+	filename = strings.ReplaceAll(filename, " ", "-")
 	fmt.Println("storage:", storage.BucketId)
 	var update = false
 	files := storage.List("", supa.FileSearchOptions{})
 	for _, f := range files {
-		if f.Name == updateForm.Image.Filename {
+		if f.Name == filename {
 			fmt.Println("File already exists")
 			update = true
 		}
 	}
-	updateConfirm := storage.UploadOrUpdate("/"+updateForm.Image.Filename, file, update)
-	fmt.Println("Upload Message = ", updateConfirm.Message, " Upload Key = ", updateConfirm.Key)
-	publicURL := storage.GetPublicUrl(updateConfirm.Key)
-	fmt.Println("Public URL = ", publicURL)
+	var signedUrl string
+	if updateForm.Image.Filename != "undefined" {
+		updateConfirm := storage.UploadOrUpdate("/"+filename, file, update)
+		fmt.Println("Upload Message = ", updateConfirm.Message, " Upload Key = ", updateConfirm.Key)
+		if updateConfirm.Message != "" {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload file"})
+			return
+		}
+		UploadKey := strings.Split(updateConfirm.Key, "/")[1]
+		fmt.Println("UploadKey:", UploadKey)
+		publicURL := storage.GetPublicUrl(UploadKey)
+		signedUrl = publicURL.SignedUrl
+		fmt.Println("Public URL = ", publicURL)
+		fmt.Println("updateFormTags:", updateForm.Tags)
+		fmt.Println("Signed URL:", publicURL.SignedUrl)
+	} else {
+		signedUrl = updateForm.ImageURL
+	}
+	var tagArray []string
+
+	err = json.Unmarshal([]byte(updateForm.Tags), &tagArray)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	project.Data = models.ProjectData{
-		Image:           publicURL.SignedUrl,
+		Image:           signedUrl,
 		Name:            updateForm.ProjectName,
 		Description:     updateForm.Description,
 		LongDescription: updateForm.LongDescription,
 		StartDate:       updateForm.SinceDate,
-		Tags:            updateForm.Tags,
+		Tags:            tagArray,
 	}
 
 	project.Id, _ = strconv.Atoi(updateForm.ID)

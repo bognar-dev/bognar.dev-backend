@@ -14,7 +14,7 @@ type UpdateProjectForm struct {
 	Image           *multipart.FileHeader ` form:"image"`
 	ProjectName     string                `form:"projectName"`
 	SinceDate       string                `form:"sinceDate"`
-	Tags            []string              `form:"tags"`
+	Tags            string                `form:"tags"`
 	Description     string                `form:"description"`
 	LongDescription string                `form:"longDescription"`
 }
