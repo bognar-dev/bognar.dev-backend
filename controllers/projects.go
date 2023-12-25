@@ -152,19 +152,20 @@ func UpdateProject(c *gin.Context) {
 
 	project.Id, _ = strconv.Atoi(updateForm.ID)
 	project.UpdatedAt = time.Now()
-
+	fmt.Println("Project:", project.Id)
 	res, err := database.DBClient.NamedExec(`UPDATE projects SET
 		                    data=:data,
 		                    updated_at=:updated_at
 		                WHERE id = :id`, &project)
-	fmt.Println("Update res:", res)
+	var row, _ = res.RowsAffected()
+	fmt.Println("Update res:", row)
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	fmt.Println(project)
-	c.JSON(http.StatusOK, project)
+	c.JSON(http.StatusOK, "Project updated successfully")
 }
 
 func Hey(c *gin.Context) {
